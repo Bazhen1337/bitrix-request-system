@@ -1,7 +1,7 @@
 <?php
 Class local_requests extends CModule
 {
-    var $MODULE_ID = "dv_module";
+    var $MODULE_ID = "local.requests";
     var $MODULE_VERSION;
     var $MODULE_VERSION_DATE;
     var $MODULE_NAME;
@@ -21,32 +21,8 @@ Class local_requests extends CModule
         $this->MODULE_NAME = "local_requests – модуль системы звявок";
         $this->MODULE_DESCRIPTION = "Модуль создан для реализации системы заявок";
     }
-//    function InstallFiles()
-//    {
-//        CopyDirFiles($_SERVER["DOCUMENT_ROOT"]."/local/modules/dv_module/install/components",
-//            $_SERVER["DOCUMENT_ROOT"]."/bitrix/components", true, true);
-//        return true;
-//    }
-//    function UnInstallFiles()
-//    {
-//        DeleteDirFilesEx("/local/components/dv");
-//        return true;
-//    }
-//    function DoInstall()
-//    {
-//        global $DOCUMENT_ROOT, $APPLICATION;
-//        $this->InstallFiles();
-//        RegisterModule("dv_module");
-//        $APPLICATION->IncludeAdminFile("Установка модуля local_requests", $DOCUMENT_ROOT."/local/modules/dv_module/install/step.php");
-//    }
-//    function DoUninstall()
-//    {
-//        global $DOCUMENT_ROOT, $APPLICATION;
-//        $this->UnInstallFiles();
-//        UnRegisterModule("dv_module");
-//        $APPLICATION->IncludeAdminFile("Деинсталляция модуля local_requests", $DOCUMENT_ROOT."/local/modules/dv_module/install/unstep.php");
-//    }
-    public function DoInstall(): bool
+
+    public function doInstall(): bool
     {
         try {
             \Bitrix\Main\ModuleManager::registerModule($this->MODULE_ID);
@@ -60,7 +36,7 @@ Class local_requests extends CModule
         return true;
     }
 
-    public function DoUninstall(): bool
+    public function doUninstall(): bool
     {
         try {
             \Bitrix\Main\ModuleManager::unRegisterModule($this->MODULE_ID);
