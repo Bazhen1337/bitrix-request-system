@@ -36,7 +36,7 @@ $userId = $USER->GetID();
 );?>
     <h2>Мои заявки</h2>
 <?$APPLICATION->IncludeComponent(
-	"bitrix:iblock.element.add.list",
+	"dtkm:element.list",
 	".default",
 	Array(
 		"ALLOW_DELETE" => "N",

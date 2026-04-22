@@ -174,6 +174,30 @@ $arComponentParameters = array(
 	),
 );
 
+if ($arIBlock) {
+    $props = CIBlock::GetByID($arIBlock);
+    $arProps = [];
+    $rsProp = CIBlockProperty::GetList(
+        ["SORT" => "ASC", "NAME" => "ASC"],
+        ["IBLOCK_ID" => $arCurrentValues["IBLOCK_ID"], "ACTIVE" => "Y"]
+    );
+
+    while ($arr = $rsProp->Fetch()) {
+        // Формируем список: [Код свойства] => [Название]
+        // Лучше использовать CODE, чтобы настройки не слетели при переносе базы
+        $key = ($arr["CODE"] ? $arr["CODE"] : $arr["ID"]);
+        $arProps[$key] = "[" . $key . "] " . $arr["NAME"];
+    }
+    $arComponentParameters["PARAMETERS"]["SHOW_PROPS"] = array(
+        "PARENT" => "IBLOCK_PARAMS",
+        "NAME" => "TEST",
+        "TYPE" => "LIST",
+        "MULTIPLE" => "Y",
+        "VALUES" => $arProps,
+        "ADDITIONAL_VALUES" => "Y",
+    );
+}
+
 if (($arCurrentValues["ELEMENT_ASSOC"] ?? 'CREATED_BY') === "PROPERTY_ID")
 {
 	$arComponentParameters["PARAMETERS"]["ELEMENT_ASSOC_PROPERTY"] = array(
