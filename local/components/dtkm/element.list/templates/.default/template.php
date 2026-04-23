@@ -26,9 +26,6 @@ if ($arResult["CAN_DELETE"] == "Y") $colspan++;
 //var_dump($arResult["test"]);
 //echo '</pre>';
 ?>
-<?if ($arResult["MESSAGE"] <> ''):?>
-	<?ShowNote($arResult["MESSAGE"])?>
-<?endif?>
 <table class="data-table">
 <?if($arResult["NO_USER"] == "N"):?>
 	<thead>
