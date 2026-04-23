@@ -35,11 +35,18 @@ Class local_requests extends CModule
         $eventManager = \Bitrix\Main\EventManager::getInstance();
 
         $eventManager->registerEventHandlerCompatible(
-            'iblock', // Исправлено: события инфоблоков в модуле iblock
+            'iblock',
             'OnBeforeIBlockElementAdd',
             $this->MODULE_ID,
-            '\Local\Requests\Events',
+            '\Local\Requests\Events\RequestManager',
             'onBeforeRequestAdd'
+        );
+        $eventManager->registerEventHandlerCompatible(
+            'iblock',
+            'OnAfterIBlockElementAdd',
+            $this->MODULE_ID,
+            '\Local\Requests\Events\RequestManager',
+            'onAfterRequestAdd'
         );
 
         return true;
@@ -49,13 +56,22 @@ Class local_requests extends CModule
     {
         try {
             $eventManager = \Bitrix\Main\EventManager::getInstance();
+
             $eventManager->unRegisterEventHandler(
                 'iblock',
                 'OnBeforeIBlockElementAdd',
                 $this->MODULE_ID,
-                '\Local\Requests\Events',
+                '\Local\Requests\Events\RequestManager',
                 'onBeforeRequestAdd'
             );
+            $eventManager->unRegisterEventHandler(
+                'iblock',
+                'OnAfterIBlockElementAdd',
+                $this->MODULE_ID,
+                '\Local\Requests\Events\RequestManager',
+                'onAfterRequestAdd'
+            );
+
             \Bitrix\Main\ModuleManager::unRegisterModule($this->MODULE_ID);
         } catch (Exception $e) {
             global $APPLICATION;
