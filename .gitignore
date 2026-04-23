@@ -1,0 +1,19 @@
+# Основное ядро и настройки
+/bitrix/*
+
+# Пользовательские файлы и кеш
+/upload/
+/bitrix/cache/
+/bitrix/managed_cache/
+/bitrix/stack_cache/
+/bitrix/html_pages/
+
+# Логи и временные файлы
+*.log
+/bitrix/backup/
+/bitrix/tmp/
+
+# Системные файлы ОС и IDE
+.DS_Store
+.idea/
+.vscode/
