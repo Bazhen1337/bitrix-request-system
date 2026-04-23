@@ -16,6 +16,15 @@ $this->setFrameMode(false);
 $colspan = 2;
 if ($arResult["CAN_EDIT"] == "Y") $colspan++;
 if ($arResult["CAN_DELETE"] == "Y") $colspan++;
+//echo '<pre>';
+//var_dump($arResult["ELEMENTS"]);
+//echo '</pre>';
+//echo '<pre>';
+//var_dump($arParams);
+//echo '</pre>';
+//echo '<pre>';
+//var_dump($arResult["test"]);
+//echo '</pre>';
 ?>
 <?if ($arResult["MESSAGE"] <> ''):?>
 	<?ShowNote($arResult["MESSAGE"])?>
@@ -24,7 +33,7 @@ if ($arResult["CAN_DELETE"] == "Y") $colspan++;
 <?if($arResult["NO_USER"] == "N"):?>
 	<thead>
 		<tr>
-			<td<?=$colspan > 1 ? " colspan=\"".$colspan."\"" : ""?>><?=GetMessage("IBLOCK_ADD_LIST_TITLE")?></td>
+			<td<?=$colspan > 1 ? " colspan=\"".$colspan."\"" : ""?>><h2><?=GetMessage("IBLOCK_ADD_LIST_TITLE")?></h2></td>
 		</tr>
 	</thead>
 	<tbody>
@@ -32,6 +41,11 @@ if ($arResult["CAN_DELETE"] == "Y") $colspan++;
 		<?foreach ($arResult["ELEMENTS"] as $arElement):?>
 		<tr>
 			<td><!--a href="detail.php?CODE=<?=$arElement["ID"]?>"--><?=$arElement["NAME"]?><!--/a--></td>
+            <?php foreach ($arElement["PROPERTIES"] as $key => $prop): ?>
+                <?php if (substr($key, -6) === '_VALUE'): ?>
+                    <td><?=$prop?></td>
+                <?php endif; ?>
+            <?php endforeach; ?>
 			<td><small><?=is_array($arResult["WF_STATUS"]) ? $arResult["WF_STATUS"][$arElement["WF_STATUS_ID"]] : $arResult["ACTIVE_STATUS"][$arElement["ACTIVE"]]?></small></td>
 			<?if ($arResult["CAN_EDIT"] == "Y"):?>
 			<td><?if ($arElement["CAN_EDIT"] == "Y"):?><a href="<?=$arParams["EDIT_URL"]?>?edit=Y&amp;CODE=<?=$arElement["ID"]?>"><?=GetMessage("IBLOCK_ADD_LIST_EDIT")?><?else:?>&nbsp;<?endif?></a></td>

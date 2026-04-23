@@ -26,4 +26,5 @@ $MESS["IBLOCK_PROPERTY_ID"] = "по свойству инфоблока -->";
 $MESS["IBLOCK_PARAMS"] = "Параметры компонента";
 $MESS["IBLOCK_MAX_USER_ENTRIES"] = "Ограничить кол-во элементов для одного пользователя";
 $MESS["IBLOCK_NAV_ON_PAGE"] = "Количество элементов на странице";
+$MESS["IBLOCK_PROPERTIES_SHOW"] = "Какие данные выводить в списке";
 ?>

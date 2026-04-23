@@ -34,25 +34,33 @@ $userId = $USER->GetID();
 	),
 	false
 );?>
-    <h2>Мои заявки</h2>
 <?$APPLICATION->IncludeComponent(
-	"dtkm:element.list",
-	".default",
-	Array(
+	"dtkm:element.list", 
+	".default", 
+	array(
 		"ALLOW_DELETE" => "N",
 		"ALLOW_EDIT" => "N",
 		"COMPONENT_TEMPLATE" => ".default",
 		"EDIT_URL" => "",
 		"ELEMENT_ASSOC" => "PROPERTY_ID",
 		"ELEMENT_ASSOC_PROPERTY" => "12",
-		"GROUPS" => array(0=>"2",),
+		"GROUPS" => array(
+			0 => "2",
+		),
 		"IBLOCK_ID" => "5",
 		"IBLOCK_TYPE" => "requests",
 		"MAX_USER_ENTRIES" => "100000",
 		"NAV_ON_PAGE" => "10",
 		"SEF_MODE" => "N",
-		"STATUS" => "ANY"
-	)
+		"STATUS" => "ANY",
+		"SHOW_PROPS" => array(
+			0 => "9",
+			1 => "10",
+			2 => "12",
+			3 => "",
+		)
+	),
+	false
 );?>
 <!--<a href="/requests/">Мои заявки</a>--><?$APPLICATION->IncludeComponent(
 	"bitrix:iblock.element.add.form", 

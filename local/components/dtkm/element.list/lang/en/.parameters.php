@@ -26,4 +26,5 @@ $MESS["IBLOCK_PROPERTY_ID"] = "by Information Block property -->";
 $MESS["IBLOCK_PARAMS"] = "Component parameters";
 $MESS["IBLOCK_MAX_USER_ENTRIES"] = "Limit the number of created elements per user";
 $MESS["IBLOCK_NAV_ON_PAGE"] = "Elements per page";
+$MESS["IBLOCK_PROPERTIES_SHOW"] = "What data to display in the list";
 ?>

@@ -118,7 +118,18 @@ if (CModule::IncludeModule("iblock"))
 			}
 
 			// get elements list using generated filter
-			$rsIBlockElements = CIBlockElement::GetList(array("SORT" => "ASC"), $arFilter);
+            $arSelect = [
+                "ID",
+                "NAME",
+                "CODE",
+            ];
+            $propMap = array_column($arIBlockPropertyList, 'CODE', 'ID');
+            foreach ($arParams["SHOW_PROPS"] as $propId) {
+                $arSelect[] = "PROPERTY_" . $propMap[$propId];
+            }
+
+
+			$rsIBlockElements = CIBlockElement::GetList(array("SORT" => "ASC"), $arFilter, false, false, $arSelect);
 
 			$arResult["ELEMENTS_COUNT"] = $rsIBlockElements->SelectedRowsCount();
 			//$page_split = intval(COption::GetOptionString("iblock", "RESULTS_PAGEN"));
@@ -139,6 +150,9 @@ if (CModule::IncludeModule("iblock"))
 			$bCanDelete = false;
 			while ($arElement = $rsIBlockElements->NavNext(false))
 			{
+                $properties = [];
+                $cleanElement = [];
+
 				$arElement = htmlspecialcharsex($arElement);
 				if ($bWorkflowIncluded)
 				{
@@ -175,7 +189,15 @@ if (CModule::IncludeModule("iblock"))
 					$bCanDelete = true;
 				}
 
-				$arResult["ELEMENTS"][] = $arElement;
+                foreach ($arElement as $key => $value) {
+                    if (strpos($key, 'PROPERTY_') === 0) {
+                        $properties[$key] = $value;
+                    } else {
+                        $cleanElement[$key] = $value;
+                    }
+                }
+
+                $arResult["ELEMENTS"][] = array_merge($cleanElement, ["PROPERTIES" => $properties]);
 			}
 
 			if ($arResult["CAN_EDIT"] == "Y" && !$bCanEdit) $arResult["CAN_EDIT"] = "N";
