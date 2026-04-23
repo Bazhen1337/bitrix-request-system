@@ -22,7 +22,7 @@ Class local_requests extends CModule
         $this->MODULE_DESCRIPTION = "Модуль создан для реализации системы заявок";
     }
 
-    public function doInstall(): bool
+    public function DoInstall(): bool
     {
         try {
             \Bitrix\Main\ModuleManager::registerModule($this->MODULE_ID);
@@ -32,13 +32,30 @@ Class local_requests extends CModule
 
             return false;
         }
+        $eventManager = \Bitrix\Main\EventManager::getInstance();
+
+        $eventManager->registerEventHandlerCompatible(
+            'iblock', // Исправлено: события инфоблоков в модуле iblock
+            'OnBeforeIBlockElementAdd',
+            $this->MODULE_ID,
+            '\Local\Requests\Events',
+            'onBeforeRequestAdd'
+        );
 
         return true;
     }
 
-    public function doUninstall(): bool
+    public function DoUninstall(): bool
     {
         try {
+            $eventManager = \Bitrix\Main\EventManager::getInstance();
+            $eventManager->unRegisterEventHandler(
+                'iblock',
+                'OnBeforeIBlockElementAdd',
+                $this->MODULE_ID,
+                '\Local\Requests\Events',
+                'onBeforeRequestAdd'
+            );
             \Bitrix\Main\ModuleManager::unRegisterModule($this->MODULE_ID);
         } catch (Exception $e) {
             global $APPLICATION;
