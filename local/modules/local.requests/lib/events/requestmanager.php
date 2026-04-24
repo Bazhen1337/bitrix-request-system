@@ -90,6 +90,7 @@ final class RequestManager
             }
         }
     }
+    public static string $oldStatusId = "";
     public static function onBeforeRequestUpdate(&$arFields) {
         if ($arFields["IBLOCK_ID"] != IBlockHelper::getID('requests')) {
             return true;
@@ -106,7 +107,7 @@ final class RequestManager
             $statusCurrentValue = $status["PROPERTY_STATUS_VALUE"];
             $statusCurrentEnumId = $status["PROPERTY_STATUS_ENUM_ID"];
         }
-
+        self::$oldStatusId = $statusCurrentEnumId;
         //fixme: вынести DESCRIPTION в языквой файл потом
         if (in_array($statusCurrentValue, ["Завершена", "Отклонена"])) {
             $propId = null;
@@ -135,9 +136,59 @@ final class RequestManager
                 return false;
             }
         }
+        return true;
     }
     public static function onAfterRequestUpdate(&$arFields) {
+//        **`OnAfterIBlockElementUpdate`** — при смене статуса на `Завершена`:
+//
+//        - Отправить почтовое уведомление через собственное почтовое событие `LOCAL_REQUEST_DONE`.
+//        - Программно **добавить агент** на ближайший запуск для архивации данной заявки.
+//        - Записать в **журнал событий**.
+        if ($arFields["IBLOCK_ID"] != IBlockHelper::getID('requests')) {
+            return true;
+        }
+        $propId = null;
+        $res = \CIBlockProperty::GetList([], [
+            "IBLOCK_ID" => IBlockHelper::getID('requests'),
+            "CODE" => "STATUS"
+        ]);
 
+        if ($prop = $res->Fetch()) {
+            $propId = $prop["ID"];
+        }
+        if ($arFields["PROPERTY_VALUES"][$propId][0]["VALUE"] != self::$oldStatusId) {
+            $res = \CIBlockPropertyEnum::GetList([], [
+                "IBLOCK_ID" => IBlockHelper::getID('requests'),
+                "PROPERTY_CODE" => "STATUS",
+                "VALUE" => "Завершена"
+            ]);
+            if ($enum = $res->Fetch()) {
+                if ($arFields["PROPERTY_VALUES"][$propId][0]["VALUE"] == $enum["ID"]) {
+                    $agentName = "\\Local\\Requests\\Agents\\RequestAgents::archiveRequest(" . $arFields["ID"] . ");";
+
+                    // Проверяем, не добавлен ли уже такой агент, чтобы не дублировать
+                    $dbAgents = \CAgent::GetList([], ["NAME" => $agentName]);
+                    if (!$dbAgents->Fetch()) {
+                        \CAgent::AddAgent(
+                            $agentName,        // имя функции
+                            "local.requests",  // ID модуля
+                            "N",               // агент не критичен к количеству запусков
+                            60,                // интервал запуска (сек) - через минуту
+                            "",                // дата первой проверки (пусто - сейчас)
+                            "Y",               // активен
+                            date("d.m.Y H:i:s", strtotime("+1 minute")) // запуск через минуту
+                        );
+                    }
+                    \CEventLog::Add([
+                        "SEVERITY" => "INFO",
+                        "AUDIT_TYPE_ID" => "requests",
+                        "MODULE_ID" => "local.requests",
+                        "ITEM_ID" => $arFields["ID"],
+                        "DESCRIPTION" => "заявка завершена",
+                    ]);
+                }
+            }
+        }
     }
     public static function onBeforeRequestDoneMailSend(&$arFields) {
 
