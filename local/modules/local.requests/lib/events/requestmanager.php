@@ -90,4 +90,56 @@ final class RequestManager
             }
         }
     }
+    public static function onBeforeRequestUpdate(&$arFields) {
+        if ($arFields["IBLOCK_ID"] != IBlockHelper::getID('requests')) {
+            return true;
+        }
+
+        $statusCurrentValue = null;
+        $statusCurrentEnumId = null;
+
+        $statusRes = \CIBlockElement::GetList(
+            arFilter: ["ID" => $arFields["ID"]],
+            arSelectFields: ["PROPERTY_STATUS"]
+        );
+        if ($status = $statusRes->Fetch()) {
+            $statusCurrentValue = $status["PROPERTY_STATUS_VALUE"];
+            $statusCurrentEnumId = $status["PROPERTY_STATUS_ENUM_ID"];
+        }
+
+        //fixme: вынести DESCRIPTION в языквой файл потом
+        if (in_array($statusCurrentValue, ["Завершена", "Отклонена"])) {
+            $propId = null;
+            $res = \CIBlockProperty::GetList([], [
+                "IBLOCK_ID" => IBlockHelper::getID('requests'),
+                "CODE" => "STATUS"
+            ]);
+
+            if ($prop = $res->Fetch()) {
+                $propId = $prop["ID"];
+            }
+            if ($arFields["PROPERTY_VALUES"][$propId][0]["VALUE"] != $statusCurrentEnumId) {
+                $itemId = $arFields["ID"];
+                register_shutdown_function(function() use ($itemId) {
+                    \CEventLog::Add([
+                        "SEVERITY" => "WARNING",
+                        "AUDIT_TYPE_ID" => "requests",
+                        "MODULE_ID" => "local.requests",
+                        "ITEM_ID" => $itemId,
+                        "DESCRIPTION" => "Попытка изменения статуса закрытой заявки",
+                    ]);
+                });
+
+                global $APPLICATION;
+                $APPLICATION->throwException('Ошибка: нельзя перевести статус из "Завершена" или "Отклонена"');
+                return false;
+            }
+        }
+    }
+    public static function onAfterRequestUpdate(&$arFields) {
+
+    }
+    public static function onBeforeRequestDoneMailSend(&$arFields) {
+
+    }
 }

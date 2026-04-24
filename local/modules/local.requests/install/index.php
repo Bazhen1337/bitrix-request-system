@@ -33,7 +33,8 @@ Class local_requests extends CModule
             return false;
         }
         $eventManager = \Bitrix\Main\EventManager::getInstance();
-
+        //fixme: подумать как сократить можно
+        //add
         $eventManager->registerEventHandlerCompatible(
             'iblock',
             'OnBeforeIBlockElementAdd',
@@ -48,6 +49,29 @@ Class local_requests extends CModule
             '\Local\Requests\Events\RequestManager',
             'onAfterRequestAdd'
         );
+        //update
+        $eventManager->registerEventHandlerCompatible(
+            'iblock',
+            'OnBeforeIBlockElementUpdate',
+            $this->MODULE_ID,
+            '\Local\Requests\Events\RequestManager',
+            'onBeforeRequestUpdate'
+        );
+        $eventManager->registerEventHandlerCompatible(
+            'iblock',
+            'OnAfterIBlockElementUpdate',
+            $this->MODULE_ID,
+            '\Local\Requests\Events\RequestManager',
+            'onAfterRequestUpdate'
+        );
+        //mail
+        $eventManager->registerEventHandlerCompatible(
+            'iblock',
+            'OnBeforeMailSend',
+            $this->MODULE_ID,
+            '\Local\Requests\Events\RequestManager',
+            'onBeforeRequestDoneMailSend'
+        );
 
         return true;
     }
@@ -57,6 +81,7 @@ Class local_requests extends CModule
         try {
             $eventManager = \Bitrix\Main\EventManager::getInstance();
 
+            //add
             $eventManager->unRegisterEventHandler(
                 'iblock',
                 'OnBeforeIBlockElementAdd',
@@ -70,6 +95,29 @@ Class local_requests extends CModule
                 $this->MODULE_ID,
                 '\Local\Requests\Events\RequestManager',
                 'onAfterRequestAdd'
+            );
+            //update
+            $eventManager->unRegisterEventHandler(
+                'iblock',
+                'OnBeforeIBlockElementUpdate',
+                $this->MODULE_ID,
+                '\Local\Requests\Events\RequestManager',
+                'onBeforeRequestUpdate'
+            );
+            $eventManager->unRegisterEventHandler(
+                'iblock',
+                'OnAfterIBlockElementUpdate',
+                $this->MODULE_ID,
+                '\Local\Requests\Events\RequestManager',
+                'onAfterRequestUpdate'
+            );
+            //mail
+            $eventManager->unRegisterEventHandler(
+                'iblock',
+                'OnBeforeMailSend',
+                $this->MODULE_ID,
+                '\Local\Requests\Events\RequestManager',
+                'onBeforeRequestDoneMailSend'
             );
 
             \Bitrix\Main\ModuleManager::unRegisterModule($this->MODULE_ID);
