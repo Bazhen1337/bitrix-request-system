@@ -6,11 +6,12 @@ class RequestAgents
 {
     public static function archiveRequest($elementId)
     {
-
         if ($elementId <= 0) return "";
         //todo: не вызывается статически эта залупа
+        //todo: он походу перезатирает нахуй все остальные поля
         \Bitrix\Main\Loader::includeModule('iblock');
-        $res = \CIBlockElement::Update($elementId, [
+        $el = new \CIBlockElement;
+        $res = $el->Update($elementId, [
             "ACTIVE" => "N",
         ]);
 

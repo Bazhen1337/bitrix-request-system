@@ -92,7 +92,8 @@ final class RequestManager
     }
     public static string $oldStatusId = "";
     public static function onBeforeRequestUpdate(&$arFields) {
-        if ($arFields["IBLOCK_ID"] != IBlockHelper::getID('requests')) {
+
+        if ($arFields["IBLOCK_ID"] != IBlockHelper::getID('requests') || (is_null($arFields['PROPERTY_VALUES']))) {
             return true;
         }
 
