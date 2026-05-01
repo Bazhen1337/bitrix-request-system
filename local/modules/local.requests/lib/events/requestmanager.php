@@ -6,6 +6,7 @@ use Local\Requests\helpers\IBlockHelper;
 
 final class RequestManager
 {
+    public static string $oldStatusId = "";
     public static function onBeforeRequestAdd(&$arFields)
     {
         if ($arFields["IBLOCK_ID"] != IBlockHelper::getID('requests')) {
@@ -90,7 +91,6 @@ final class RequestManager
             }
         }
     }
-    public static string $oldStatusId = "";
     public static function onBeforeRequestUpdate(&$arFields) {
 
         if ($arFields["IBLOCK_ID"] != IBlockHelper::getID('requests') || (is_null($arFields['PROPERTY_VALUES']))) {
@@ -185,13 +185,56 @@ final class RequestManager
                         "AUDIT_TYPE_ID" => "requests",
                         "MODULE_ID" => "local.requests",
                         "ITEM_ID" => $arFields["ID"],
-                        "DESCRIPTION" => "заявка завершена",
+                        "DESCRIPTION" => "заявка завершена и скоро будет переведена в архив",
                     ]);
+
+                    $userFieldId = \CIBlockProperty::GetList([], [
+                        "IBLOCK_ID" => IBlockHelper::getID('requests'),
+                        "CODE" => "AUTHOR"
+                    ])->GetNext()['ID'];
+
+                    $dateFieldId = \CIBlockProperty::GetList([], [
+                        "IBLOCK_ID" => IBlockHelper::getID('requests'),
+                        "CODE" => "MEET_DATE"
+                    ])->GetNext()['ID'];
+
+                    \CEvent::Send(
+                        "LOCAL_REQUEST_DONE",
+                        's1',
+                        [
+                            "ID" => $arFields["ID"],
+                            "USER_ID" => current($arFields["PROPERTY_VALUES"][$userFieldId])["VALUE"],
+                            "MEET_DATE" => current($arFields["PROPERTY_VALUES"][$dateFieldId])["VALUE"],
+                        ]
+                    );
                 }
             }
         }
+        return true;
     }
-    public static function onBeforeRequestDoneMailSend(&$arFields) {
-
+    public static function onBeforeRequestDoneMailSend(&$arFields)
+    {
+//        if ($arFields['EVENT_NAME'] === 'LOCAL_REQUEST_DONE') {
+//
+//            // 2. Извлекаем ID заявки из массива полей (CEvent::Send передает их в 'C_FIELDS')
+//            $requestId = isset($arFields['C_FIELDS']['ID']) ? $arFields['C_FIELDS']['ID'] : 'Н/Д';
+//            $date = date('d.m.Y H:i:s');
+//
+//            $extraInfo = "\n\n---";
+//            $extraInfo .= "\nДата отправки: " . $date;
+//            $extraInfo .= "\nID заявки: " . $requestId;
+//
+//            // 3. Добавляем информацию в тело письма
+//            // Учитываем, может ли письмо быть в формате HTML
+//            if (isset($arFields['BODY']) && !empty($arFields['BODY'])) {
+//                if ($arFields['DUPLICATE'] == 'Y' || strpos($arFields['BODY'], '<body') !== false || strpos($arFields['BODY'], '<p') !== false) {
+//                    // Если HTML, добавляем через <br>
+//                    $arFields['BODY'] .= nl2br($extraInfo);
+//                } else {
+//                    // Если обычный текст
+//                    $arFields['BODY'] .= $extraInfo;
+//                }
+//            }
+//        }
     }
 }
