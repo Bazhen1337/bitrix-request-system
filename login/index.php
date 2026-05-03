@@ -6,7 +6,6 @@ if (is_string($_REQUEST["backurl"]) && mb_strpos($_REQUEST["backurl"], "/") === 
 {
 	LocalRedirect($_REQUEST["backurl"]);
 }
-
 $APPLICATION->SetTitle("Вход на сайт");
 $userId = $USER->GetID();
 ?><?$APPLICATION->IncludeComponent(

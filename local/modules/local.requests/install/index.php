@@ -72,6 +72,8 @@ Class local_requests extends CModule
             '\Local\Requests\Events\RequestManager',
             'onBeforeRequestDoneMailSend'
         );
+        //agent
+        $this->installAgent();
 
         return true;
     }
@@ -119,6 +121,8 @@ Class local_requests extends CModule
                 '\Local\Requests\Events\RequestManager',
                 'onBeforeRequestDoneMailSend'
             );
+            //agent
+            $this->uninstallAgent();
 
             \Bitrix\Main\ModuleManager::unRegisterModule($this->MODULE_ID);
         } catch (Exception $e) {
@@ -129,6 +133,34 @@ Class local_requests extends CModule
         }
 
         return true;
+    }
+
+    private function installAgent(): void
+    {
+        $agentName = '\\Local\\Requests\\Agents\\RequestAgents::archiveExpired();';
+
+        // Проверяем, существует ли уже агент
+        $existingAgent = \CAgent::GetList(
+            ['ID' => 'DESC'],
+            ['NAME' => $agentName]
+        )->Fetch();
+
+        if (!$existingAgent) {
+            \CAgent::AddAgent(
+                $agentName,                // имя агента
+                'local.requests',          // модуль
+                'Y',                       // не периодический (свой интервал)
+                60,                     // период: 24 часа
+                '',                        // дата первого запуска (сейчас)
+                'Y',                       // активен
+                date("d.m.Y H:i:s", strtotime("+1 minute")), // запуск через минуту
+                100                        // сортировка
+            );
+        }
+    }
+    private function uninstallAgent(): void
+    {
+        \CAgent::RemoveAgent('\\Local\\Requests\\Agents\\RequestAgents::archiveExpired();', 'local.requests');
     }
 }
 ?>

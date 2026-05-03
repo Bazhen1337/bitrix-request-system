@@ -2,6 +2,8 @@
 
 namespace Local\Requests\Agents;
 
+use Local\Requests\helpers\IBlockHelper;
+
 class RequestAgents
 {
     public static function archiveRequest($elementId)
@@ -23,5 +25,41 @@ class RequestAgents
             "DESCRIPTION" => "агент отработал, результат: " . $res,
         ]);
         return "";
+    }
+
+    public static function archiveExpired()
+    {
+        if (!\Bitrix\Main\Loader::includeModule('iblock')) {
+            return __METHOD__ . "();";
+        }
+
+//        $deadline = (new DateTime())->add("-7 days");
+        $deadline = (new \Bitrix\Main\Type\DateTime())->add("-1 minutes");
+
+        $res = \CIBlockElement::GetList(
+            [],
+            [
+                'IBLOCK_ID' => IBlockHelper::getID('requests'),
+                'PROPERTY_STATUS_VALUE' => 'В работе',
+                '<=PROPERTY_MEET_DATE' => $deadline->format("Y-m-d H:i:s"),
+            ],
+            false,
+            false,
+            ['ID', 'IBLOCK_ID', 'PROPERTY_MEET_DATE']
+        );
+        $declineId = \CIBlockPropertyEnum::GetList([], [
+            "IBLOCK_ID" => IBlockHelper::getID('requests'),
+            "PROPERTY_CODE" => "STATUS",
+            "VALUE" => "Отклонена"
+        ])->Fetch()["ID"];
+
+        while ($item = $res->Fetch()) {
+            \CIBlockElement::SetPropertyValuesEx($item['ID'], $item['IBLOCK_ID'], [
+                'STATUS' => [
+                    'VALUE' => $declineId
+                ]
+            ]);
+        }
+        return __METHOD__ . "();";
     }
 }
