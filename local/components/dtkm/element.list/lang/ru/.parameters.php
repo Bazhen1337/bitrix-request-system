@@ -27,4 +27,7 @@ $MESS["IBLOCK_PARAMS"] = "Параметры компонента";
 $MESS["IBLOCK_MAX_USER_ENTRIES"] = "Ограничить кол-во элементов для одного пользователя";
 $MESS["IBLOCK_NAV_ON_PAGE"] = "Количество элементов на странице";
 $MESS["IBLOCK_PROPERTIES_SHOW"] = "Какие данные выводить в списке";
+$MESS["IBLOCK_SHOW_AUTHOR_DATA"] = "Показывать данные автора";
+$MESS["IBLOCK_MANAGER_GROUPS"] = "Группы, которые видят все заявки с именем пользователя";
+$MESS["IBLOCK_EXPERT_MANAGER_GROUPS"] = "Группы, которые видят все заявки с именем и электронной почтой пользователя";
 ?>

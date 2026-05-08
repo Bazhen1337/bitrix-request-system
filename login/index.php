@@ -55,14 +55,19 @@ $userId = $USER->GetID();
 		"SHOW_PROPS" => array(
 			0 => "9",
 			1 => "10",
-			2 => "12",
-			3 => "",
+		),
+		"SHOW_AUTHOR_DATA" => "Y",
+		"MANAGER_GROUPS" => array(
+			0 => "5",
+		),
+		"EXPERT_MANAGER_GROUPS" => array(
+			0 => "6",
 		)
 	),
 	false
 );?>
-<!--<a href="/requests/">Мои заявки</a>--><?$APPLICATION->IncludeComponent(
-	"bitrix:iblock.element.add.form", 
+<?$APPLICATION->IncludeComponent(
+	"bitrix:iblock.element.add.form",
 	".default", 
 	array(
 		"CUSTOM_TITLE_DATE_ACTIVE_FROM" => "",
@@ -108,4 +113,8 @@ $userId = $USER->GetID();
 		"ELEMENT_ASSOC_PROPERTY" => "12"
 	),
 	false
-);?><?require($_SERVER["DOCUMENT_ROOT"]."/bitrix/footer.php");?>
+);?>
+    <a href="<?=$APPLICATION->GetCurPageParam("logout=yes&".bitrix_sessid_get(), array("login", "logout", "register", "forgot_password", "change_password"));?>" rel="nofollow">
+        Выйти
+    </a>
+<?require($_SERVER["DOCUMENT_ROOT"]."/bitrix/footer.php");?>

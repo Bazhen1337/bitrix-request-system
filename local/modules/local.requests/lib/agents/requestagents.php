@@ -33,6 +33,8 @@ class RequestAgents
             return __METHOD__ . "();";
         }
 
+        //todo: убрать тестовые данные
+        //todo: кинуть на крон
 //        $deadline = (new DateTime())->add("-7 days");
         $deadline = (new \Bitrix\Main\Type\DateTime())->add("-1 minutes");
 

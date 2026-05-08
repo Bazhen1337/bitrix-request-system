@@ -1,5 +1,6 @@
 <?
 $MESS ['IBLOCK_ADD_LIST_TITLE'] = "My elements";
+$MESS ['IBLOCK_ADD_LIST_TITLE_FOR_MANAGER'] = "All elements";
 $MESS ['IBLOCK_ADD_LIST_EMPTY'] = "You did not add any elements";
 $MESS ['IBLOCK_ADD_LIST_EDIT'] = "edit";
 $MESS ['IBLOCK_ADD_LIST_DELETE'] = "delete";

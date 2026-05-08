@@ -27,4 +27,7 @@ $MESS["IBLOCK_PARAMS"] = "Component parameters";
 $MESS["IBLOCK_MAX_USER_ENTRIES"] = "Limit the number of created elements per user";
 $MESS["IBLOCK_NAV_ON_PAGE"] = "Elements per page";
 $MESS["IBLOCK_PROPERTIES_SHOW"] = "What data to display in the list";
+$MESS["IBLOCK_SHOW_AUTHOR_DATA"] = "Show author data";
+$MESS["IBLOCK_MANAGER_GROUPS"] = "Groups that can view all requests with the username";
+$MESS["IBLOCK_EXPERT_MANAGER_GROUPS"] = "Groups that can view all requests with the user's name and email";
 ?>

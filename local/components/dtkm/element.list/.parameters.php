@@ -185,6 +185,36 @@ if ($arProperty) {
     );
 }
 
+$arComponentParameters["PARAMETERS"]["SHOW_AUTHOR_DATA"] = array(
+    "PARENT" => "PARAMS",
+    "NAME" => GetMessage("IBLOCK_SHOW_AUTHOR_DATA"),
+    "TYPE" => "CHECKBOX",
+    "DEFAULT" => "N",
+    "REFRESH" => "Y",
+);
+
+if ($arCurrentValues["SHOW_AUTHOR_DATA"] == "Y") {
+    $arGroups = array();
+    $rsGroups = CGroup::GetList(($by="c_sort"), ($order="asc"), array("ACTIVE" => "Y"));
+    while($arGroup = $rsGroups->Fetch()) {
+        $arGroups[$arGroup["ID"]] = "[".$arGroup["ID"]."] ".$arGroup["NAME"];
+    }
+    $arComponentParameters["PARAMETERS"]["MANAGER_GROUPS"] = array(
+        "PARENT" => "PARAMS",
+        "NAME" => GetMessage("IBLOCK_MANAGER_GROUPS"),
+        "TYPE" => "LIST",
+        "MULTIPLE" => "Y",
+        "VALUES" => $arGroups,
+    );
+    $arComponentParameters["PARAMETERS"]["EXPERT_MANAGER_GROUPS"] = array(
+        "PARENT" => "PARAMS",
+        "NAME" => GetMessage("IBLOCK_EXPERT_MANAGER_GROUPS"),
+        "TYPE" => "LIST",
+        "MULTIPLE" => "Y",
+        "VALUES" => $arGroups,
+    );
+}
+
 if (($arCurrentValues["ELEMENT_ASSOC"] ?? 'CREATED_BY') === "PROPERTY_ID")
 {
 	$arComponentParameters["PARAMETERS"]["ELEMENT_ASSOC_PROPERTY"] = array(

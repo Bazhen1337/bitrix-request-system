@@ -20,17 +20,18 @@ if ($arResult["CAN_DELETE"] == "Y") $colspan++;
 //var_dump($arResult["ELEMENTS"]);
 //echo '</pre>';
 //echo '<pre>';
-//var_dump($arParams);
+//var_dump($arParams["ELEMENT_ASSOC_PROPERTY"]);
 //echo '</pre>';
 //echo '<pre>';
 //var_dump($arResult["test"]);
 //echo '</pre>';
+
 ?>
 <table class="data-table">
 <?if($arResult["NO_USER"] == "N"):?>
 	<thead>
 		<tr>
-			<td<?=$colspan > 1 ? " colspan=\"".$colspan."\"" : ""?>><h2><?=GetMessage("IBLOCK_ADD_LIST_TITLE")?></h2></td>
+			<td<?=$colspan > 1 ? " colspan=\"".$colspan."\"" : ""?>><h2><?= $arResult["SHOW_ALL"] ? GetMessage("IBLOCK_ADD_LIST_TITLE_FOR_MANAGER") : GetMessage("IBLOCK_ADD_LIST_TITLE")?></h2></td>
 		</tr>
 	</thead>
 	<tbody>

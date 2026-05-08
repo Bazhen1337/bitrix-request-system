@@ -72,14 +72,26 @@ if (CModule::IncludeModule("iblock"))
 			$arFilter = array("IBLOCK_TYPE" => $arParams["IBLOCK_TYPE"], "IBLOCK_ID" => $arParams["IBLOCK_ID"], "SHOW_NEW" => "Y");
 			// check type of user association to iblock elements and add user association to filter
 
-			if ($arParams["ELEMENT_ASSOC"] == "PROPERTY_ID" && intval($arParams["ELEMENT_ASSOC_PROPERTY"]) > 0 && in_array($arParams["ELEMENT_ASSOC_PROPERTY"], $arPropertyIDs))
-			{
-				$arFilter["PROPERTY_".$arParams["ELEMENT_ASSOC_PROPERTY"]] = $USER->GetID();
-			}
-			else
-			{
-				$arFilter["CREATED_BY"] = $USER->GetID();
-			}
+            $arResult["SHOW_ALL"] = false;
+            if ($arParams["SHOW_AUTHOR_DATA"] === "Y") {
+                $arGroups = $USER->GetUserGroupArray();
+                $managerGroups = is_array($arParams["MANAGER_GROUPS"]) ? $arParams["MANAGER_GROUPS"] : [];
+                $expertGroups = is_array($arParams["EXPERT_MANAGER_GROUPS"]) ? $arParams["EXPERT_MANAGER_GROUPS"] : [];
+
+                $allAllowedGroups = array_merge($managerGroups, $expertGroups);
+
+                if ($USER->IsAdmin() || count(array_intersect($arGroups, $allAllowedGroups)) > 0) {
+                    $arResult["SHOW_ALL"] = true;
+                }
+            }
+
+            if (!$arResult["SHOW_ALL"]) {
+                if ($arParams["ELEMENT_ASSOC"] == "PROPERTY_ID" && intval($arParams["ELEMENT_ASSOC_PROPERTY"]) > 0 && in_array($arParams["ELEMENT_ASSOC_PROPERTY"], $arPropertyIDs)) {
+                    $arFilter["PROPERTY_".$arParams["ELEMENT_ASSOC_PROPERTY"]] = $USER->GetID();
+                } else {
+                    $arFilter["CREATED_BY"] = $USER->GetID();
+                }
+            }
 
 			// deleteting element
 			if (check_bitrix_sessid() && $_REQUEST["delete"] == "Y" && $arResult["CAN_DELETE"])
@@ -124,10 +136,14 @@ if (CModule::IncludeModule("iblock"))
                 "CODE",
             ];
             $propMap = array_column($arIBlockPropertyList, 'CODE', 'ID');
+
+            if ($arResult["SHOW_ALL"]) {
+                $arSelect[] = "PROPERTY_" . $arParams["ELEMENT_ASSOC_PROPERTY"];
+            }
+
             foreach ($arParams["SHOW_PROPS"] as $propId) {
                 $arSelect[] = "PROPERTY_" . $propMap[$propId];
             }
-
 
 			$rsIBlockElements = CIBlockElement::GetList(array("SORT" => "ASC"), $arFilter, false, false, $arSelect);
 
@@ -191,13 +207,21 @@ if (CModule::IncludeModule("iblock"))
 
                 foreach ($arElement as $key => $value) {
                     if (strpos($key, 'PROPERTY_') === 0) {
-                        $properties[$key] = $value;
+                        if (strpos($key, 'PROPERTY_' . $arParams["ELEMENT_ASSOC_PROPERTY"]) !== 0) {
+                            $properties[$key] = $value;
+                        } else {
+                            $userProperty[$key] = $value;
+                        }
                     } else {
                         $cleanElement[$key] = $value;
                     }
                 }
 
-                $arResult["ELEMENTS"][] = array_merge($cleanElement, ["PROPERTIES" => $properties]);
+                $arResult["ELEMENTS"][] = array_merge(
+                    $cleanElement,
+                    ["PROPERTIES" => $properties],
+                    ["USER_PROPERTY" => $userProperty ?? null]
+                );
 			}
 
 			if ($arResult["CAN_EDIT"] == "Y" && !$bCanEdit) $arResult["CAN_EDIT"] = "N";
