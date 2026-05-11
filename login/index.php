@@ -1,4 +1,5 @@
 <?
+//6. Кастомизация компонента списка заявок
 define("NEED_AUTH", true);
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");
 

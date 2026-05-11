@@ -1,5 +1,5 @@
 <?php
-
+//5. Агент
 namespace Local\Requests\Agents;
 
 use Local\Requests\helpers\IBlockHelper;
@@ -9,8 +9,6 @@ class RequestAgents
     public static function archiveRequest($elementId)
     {
         if ($elementId <= 0) return "";
-        //todo: не вызывается статически эта залупа
-        //todo: он походу перезатирает нахуй все остальные поля
         \Bitrix\Main\Loader::includeModule('iblock');
         $el = new \CIBlockElement;
         $res = $el->Update($elementId, [
@@ -22,7 +20,7 @@ class RequestAgents
             "AUDIT_TYPE_ID" => "requests",
             "MODULE_ID" => "local.requests",
             "ITEM_ID" => $elementId,
-            "DESCRIPTION" => "агент отработал, результат: " . $res,
+            "DESCRIPTION" => GetMessage("AGENT_DONE") . $res,
         ]);
         return "";
     }
@@ -33,10 +31,7 @@ class RequestAgents
             return __METHOD__ . "();";
         }
 
-        //todo: убрать тестовые данные
-        //todo: кинуть на крон
-//        $deadline = (new DateTime())->add("-7 days");
-        $deadline = (new \Bitrix\Main\Type\DateTime())->add("-1 minutes");
+        $deadline = (new \Bitrix\Main\Type\DateTime())->add("-7 days");
 
         $res = \CIBlockElement::GetList(
             [],

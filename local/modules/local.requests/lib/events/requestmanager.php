@@ -1,5 +1,5 @@
 <?php
-
+//3. Обработчики событий (регистрация в модуле)
 namespace Local\Requests\Events;
 
 use Local\Requests\helpers\IBlockHelper;
@@ -13,7 +13,7 @@ final class RequestManager
         if ($arFields["IBLOCK_ID"] != IBlockHelper::getID('requests')) {
             return true;
         }
-        //fixme: вынести в функцию
+
         $propId = null;
         $res = \CIBlockProperty::GetList([], [
             "IBLOCK_ID" => IBlockHelper::getID('requests'),
@@ -31,10 +31,10 @@ final class RequestManager
         $currentTime = new \Bitrix\Main\Type\DateTime();
         if ($userDate->getTimestamp() < $currentTime->getTimestamp()) {
             global $APPLICATION;
-            $APPLICATION->throwException("Ошибка: Дата встречи не может быть в прошлом!");
+            $APPLICATION->throwException(GetMessage("REQUEST_PAST_DATE_ERROR"));
             return false;
         }
-        //fixme: вынести в функцию
+
         $propId = null;
         $res = \CIBlockProperty::GetList([], [
             "IBLOCK_ID" => IBlockHelper::getID('requests'),
@@ -110,7 +110,6 @@ final class RequestManager
             $statusCurrentEnumId = $status["PROPERTY_STATUS_ENUM_ID"];
         }
         self::$oldStatusId = $statusCurrentEnumId;
-        //fixme: вынести DESCRIPTION в языквой файл потом
         if (in_array($statusCurrentValue, ["Завершена", "Отклонена"])) {
             $propId = null;
             $res = \CIBlockProperty::GetList([], [
@@ -129,23 +128,18 @@ final class RequestManager
                         "AUDIT_TYPE_ID" => "requests",
                         "MODULE_ID" => "local.requests",
                         "ITEM_ID" => $itemId,
-                        "DESCRIPTION" => "Попытка изменения статуса закрытой заявки",
+                        "DESCRIPTION" => GetMessage("REQUEST_CLOSED_WARNING_LOG"),
                     ]);
                 });
 
                 global $APPLICATION;
-                $APPLICATION->throwException('Ошибка: нельзя перевести статус из "Завершена" или "Отклонена"');
+                $APPLICATION->throwException(GetMessage("REQUEST_CLOSED_ERROR"));
                 return false;
             }
         }
         return true;
     }
     public static function onAfterRequestUpdate(&$arFields) {
-//        **`OnAfterIBlockElementUpdate`** — при смене статуса на `Завершена`:
-//
-//        - Отправить почтовое уведомление через собственное почтовое событие `LOCAL_REQUEST_DONE`.
-//        - Программно **добавить агент** на ближайший запуск для архивации данной заявки.
-//        - Записать в **журнал событий**.
         if ($arFields["IBLOCK_ID"] != IBlockHelper::getID('requests')) {
             return true;
         }
@@ -185,7 +179,7 @@ final class RequestManager
                         "AUDIT_TYPE_ID" => "requests",
                         "MODULE_ID" => "local.requests",
                         "ITEM_ID" => $arFields["ID"],
-                        "DESCRIPTION" => "заявка завершена и скоро будет переведена в архив",
+                        "DESCRIPTION" => GetMessage("REQUEST_ARCHIVE_INFO_LOG"),
                     ]);
 
                     $userFieldId = \CIBlockProperty::GetList([], [
@@ -224,11 +218,11 @@ final class RequestManager
                         );
                     } else {
                         \CEventLog::Add([
-                            "SEVERITY" => "INFO",
+                            "SEVERITY" => "WARNING",
                             "AUDIT_TYPE_ID" => "requests",
                             "MODULE_ID" => "local.requests",
                             "ITEM_ID" => $arFields["ID"],
-                            "DESCRIPTION" => "Имя или емейл пользователя утеряны",
+                            "DESCRIPTION" => GetMessage("REQUEST_MISSED_USER_DATA_WARNING_LOG"),
                         ]);
                     }
                 }

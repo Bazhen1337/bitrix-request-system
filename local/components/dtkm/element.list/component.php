@@ -1,4 +1,5 @@
 <?
+//6. Кастомизация компонента списка заявок
 if (!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED!==true) die();
 /** @var CBitrixComponent $this */
 /** @var array $arParams */

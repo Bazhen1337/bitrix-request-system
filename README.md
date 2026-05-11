@@ -37,6 +37,10 @@
 - Зарегистрировать все обработчики событий (не на хитах).
 - Добавить языковые фразы для отображения названия модуля в административном разделе.
 
+**Задействованные файлы:**
+*   **Ядро модуля:** `local/modules/local.requests/install/index.php`, `local/modules/local.requests/install/version.php`
+*   **Локализация:** `local/modules/local.requests/install/lang/ru/index.php`, `local/modules/local.requests/install/lang/en/index.php`
+
 ### 2. Инфоблок «Заявки»
 Создать инфоблок со свойствами:
 - **Статус** — тип «Список» (Новая → В работе → Завершена → Отклонена)
@@ -69,6 +73,10 @@
 #### `OnBeforeMailSend`
 - Для писем типа `LOCAL_REQUEST_DONE` добавить в тело письма строку с датой отправки и ID заявки.
 
+**Задействованные файлы:**
+*   **Обработчики:** `local/modules/local.requests/lib/events/requestmanager.php`
+*   **Языковые файлы:** `local/modules/local.requests/lib/agents/lang/ru/requestmanager.php`, `local/modules/local.requests/lib/agents/lang/en/requestmanager.php`
+
 ### 4. Собственное почтовое событие и шаблон
 - Зарегистрировать событие `LOCAL_REQUEST_DONE` с полями:
     - `REQUEST_ID`
@@ -86,6 +94,15 @@
     - Не использует `die`/`exit`.
     - Возвращает имя функции.
 - Настроить запуск и через хиты, и через cron.
+
+**Задействованные файлы:**
+*   **Агенты:** `local/modules/local.requests/lib/agents/requestagents.php`
+*   **Языковые файлы:** `local/modules/local.requests/lib/agents/lang/ru/requestagents.php`, `local/modules/local.requests/lib/agents/lang/en/requestagents.php`
+*   **Крон:** `local/php_interface/include/cron.php`
+
+**Дополнительные действия:**
+* Настройка крон на сервере на запуск каждый день в 2 часа ночи /tmp/crontab.MChX4f \
+`0 2 * * * /usr/bin/php /home/bitrix/www/local/php_interface/include/cron.php`
 
 ### 6. Кастомизация компонента списка заявок
 В шаблоне используется `bitrix:iblock.element.list`.
@@ -105,6 +122,10 @@
 - Вывести под списком количество заявок по каждому статусу **вне кеша компонента**.
 - Вёрстка — plain text или минимальный `<ul>`, без стилей.
 
+
+  **Задействованные файлы:**
+*   **Компонент:** `local/components/dtkm/element.list`
+*   **Страница со списком элементов:** `login/index.php`
 ---
 
 ## Дополнительные требования

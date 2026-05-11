@@ -1,4 +1,5 @@
 <?php
+//1. Собственный модуль
 Class local_requests extends CModule
 {
     var $MODULE_ID = "local.requests";
@@ -6,20 +7,20 @@ Class local_requests extends CModule
     var $MODULE_VERSION_DATE;
     var $MODULE_NAME;
     var $MODULE_DESCRIPTION;
-    var $MODULE_CSS;
+
     function __construct()
     {
         $arModuleVersion = array();
         $path = str_replace("\\", "/", __FILE__);
-        $path = substr($path, 0, strlen($path) - strlen("/index.php"));
+        $path = substr($path, 0, strlen($path) - strlen("/requestmanager.php"));
         include($path."/version.php");
         if (is_array($arModuleVersion) && array_key_exists("VERSION", $arModuleVersion))
         {
             $this->MODULE_VERSION = $arModuleVersion["VERSION"];
             $this->MODULE_VERSION_DATE = $arModuleVersion["VERSION_DATE"];
         }
-        $this->MODULE_NAME = "local_requests – модуль системы звявок";
-        $this->MODULE_DESCRIPTION = "Модуль создан для реализации системы заявок";
+        $this->MODULE_NAME = "local_requests – " . GetMessage("MODULE_NAME");
+        $this->MODULE_DESCRIPTION = GetMessage("MODULE_DESCRIPTION");
     }
 
     public function DoInstall(): bool
@@ -32,46 +33,10 @@ Class local_requests extends CModule
 
             return false;
         }
-        $eventManager = \Bitrix\Main\EventManager::getInstance();
-        //fixme: подумать как сократить можно
-        //add
-        $eventManager->registerEventHandlerCompatible(
-            'iblock',
-            'OnBeforeIBlockElementAdd',
-            $this->MODULE_ID,
-            '\Local\Requests\Events\RequestManager',
-            'onBeforeRequestAdd'
-        );
-        $eventManager->registerEventHandlerCompatible(
-            'iblock',
-            'OnAfterIBlockElementAdd',
-            $this->MODULE_ID,
-            '\Local\Requests\Events\RequestManager',
-            'onAfterRequestAdd'
-        );
-        //update
-        $eventManager->registerEventHandlerCompatible(
-            'iblock',
-            'OnBeforeIBlockElementUpdate',
-            $this->MODULE_ID,
-            '\Local\Requests\Events\RequestManager',
-            'onBeforeRequestUpdate'
-        );
-        $eventManager->registerEventHandlerCompatible(
-            'iblock',
-            'OnAfterIBlockElementUpdate',
-            $this->MODULE_ID,
-            '\Local\Requests\Events\RequestManager',
-            'onAfterRequestUpdate'
-        );
-        //mail
-        $eventManager->registerEventHandlerCompatible(
-            'main',
-            'OnBeforeMailSend',
-            $this->MODULE_ID,
-            '\Local\Requests\Events\RequestManager',
-            'onBeforeRequestDoneMailSend'
-        );
+        //events
+        //3. Обработчики событий (регистрация в модуле)
+        $this->registerEvents();
+
         //agent
         $this->installAgent();
 
@@ -81,46 +46,10 @@ Class local_requests extends CModule
     public function DoUninstall(): bool
     {
         try {
-            $eventManager = \Bitrix\Main\EventManager::getInstance();
+            //events
+            //3. Обработчики событий (регистрация в модуле)
+            $this->unregisterEvents();
 
-            //add
-            $eventManager->unRegisterEventHandler(
-                'iblock',
-                'OnBeforeIBlockElementAdd',
-                $this->MODULE_ID,
-                '\Local\Requests\Events\RequestManager',
-                'onBeforeRequestAdd'
-            );
-            $eventManager->unRegisterEventHandler(
-                'iblock',
-                'OnAfterIBlockElementAdd',
-                $this->MODULE_ID,
-                '\Local\Requests\Events\RequestManager',
-                'onAfterRequestAdd'
-            );
-            //update
-            $eventManager->unRegisterEventHandler(
-                'iblock',
-                'OnBeforeIBlockElementUpdate',
-                $this->MODULE_ID,
-                '\Local\Requests\Events\RequestManager',
-                'onBeforeRequestUpdate'
-            );
-            $eventManager->unRegisterEventHandler(
-                'iblock',
-                'OnAfterIBlockElementUpdate',
-                $this->MODULE_ID,
-                '\Local\Requests\Events\RequestManager',
-                'onAfterRequestUpdate'
-            );
-            //mail
-            $eventManager->unRegisterEventHandler(
-                'main',
-                'OnBeforeMailSend',
-                $this->MODULE_ID,
-                '\Local\Requests\Events\RequestManager',
-                'onBeforeRequestDoneMailSend'
-            );
             //agent
             $this->uninstallAgent();
 
@@ -161,6 +90,96 @@ Class local_requests extends CModule
     private function uninstallAgent(): void
     {
         \CAgent::RemoveAgent('\\Local\\Requests\\Agents\\RequestAgents::archiveExpired();', 'local.requests');
+    }
+
+    //3. Обработчики событий (регистрация в модуле)
+    private function registerEvents()
+    {
+        $eventManager = \Bitrix\Main\EventManager::getInstance();
+
+        //add
+        $eventManager->registerEventHandlerCompatible(
+            'iblock',
+            'OnBeforeIBlockElementAdd',
+            $this->MODULE_ID,
+            '\Local\Requests\Events\RequestManager',
+            'onBeforeRequestAdd'
+        );
+        $eventManager->registerEventHandlerCompatible(
+            'iblock',
+            'OnAfterIBlockElementAdd',
+            $this->MODULE_ID,
+            '\Local\Requests\Events\RequestManager',
+            'onAfterRequestAdd'
+        );
+        //update
+        $eventManager->registerEventHandlerCompatible(
+            'iblock',
+            'OnBeforeIBlockElementUpdate',
+            $this->MODULE_ID,
+            '\Local\Requests\Events\RequestManager',
+            'onBeforeRequestUpdate'
+        );
+        $eventManager->registerEventHandlerCompatible(
+            'iblock',
+            'OnAfterIBlockElementUpdate',
+            $this->MODULE_ID,
+            '\Local\Requests\Events\RequestManager',
+            'onAfterRequestUpdate'
+        );
+        //mail
+        $eventManager->registerEventHandlerCompatible(
+            'main',
+            'OnBeforeMailSend',
+            $this->MODULE_ID,
+            '\Local\Requests\Events\RequestManager',
+            'onBeforeRequestDoneMailSend'
+        );
+    }
+
+    //3. Обработчики событий (регистрация в модуле)
+    private function unregisterEvents()
+    {
+        $eventManager = \Bitrix\Main\EventManager::getInstance();
+
+        //add
+        $eventManager->unRegisterEventHandler(
+            'iblock',
+            'OnBeforeIBlockElementAdd',
+            $this->MODULE_ID,
+            '\Local\Requests\Events\RequestManager',
+            'onBeforeRequestAdd'
+        );
+        $eventManager->unRegisterEventHandler(
+            'iblock',
+            'OnAfterIBlockElementAdd',
+            $this->MODULE_ID,
+            '\Local\Requests\Events\RequestManager',
+            'onAfterRequestAdd'
+        );
+        //update
+        $eventManager->unRegisterEventHandler(
+            'iblock',
+            'OnBeforeIBlockElementUpdate',
+            $this->MODULE_ID,
+            '\Local\Requests\Events\RequestManager',
+            'onBeforeRequestUpdate'
+        );
+        $eventManager->unRegisterEventHandler(
+            'iblock',
+            'OnAfterIBlockElementUpdate',
+            $this->MODULE_ID,
+            '\Local\Requests\Events\RequestManager',
+            'onAfterRequestUpdate'
+        );
+        //mail
+        $eventManager->unRegisterEventHandler(
+            'main',
+            'OnBeforeMailSend',
+            $this->MODULE_ID,
+            '\Local\Requests\Events\RequestManager',
+            'onBeforeRequestDoneMailSend'
+        );
     }
 }
 ?>
