@@ -20,7 +20,7 @@ class RequestAgents
             "AUDIT_TYPE_ID" => "requests",
             "MODULE_ID" => "local.requests",
             "ITEM_ID" => $elementId,
-            "DESCRIPTION" => GetMessage("AGENT_DONE") . $res,
+            "DESCRIPTION" => GetMessage("AGENT_DONE") . $elementId,
         ]);
         return "";
     }
