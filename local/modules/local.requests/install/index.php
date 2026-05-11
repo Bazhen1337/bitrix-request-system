@@ -66,7 +66,7 @@ Class local_requests extends CModule
         );
         //mail
         $eventManager->registerEventHandlerCompatible(
-            'iblock',
+            'main',
             'OnBeforeMailSend',
             $this->MODULE_ID,
             '\Local\Requests\Events\RequestManager',
@@ -115,7 +115,7 @@ Class local_requests extends CModule
             );
             //mail
             $eventManager->unRegisterEventHandler(
-                'iblock',
+                'main',
                 'OnBeforeMailSend',
                 $this->MODULE_ID,
                 '\Local\Requests\Events\RequestManager',

@@ -7,6 +7,7 @@ use Local\Requests\helpers\IBlockHelper;
 final class RequestManager
 {
     public static string $oldStatusId = "";
+    public static string $requestId = "";
     public static function onBeforeRequestAdd(&$arFields)
     {
         if ($arFields["IBLOCK_ID"] != IBlockHelper::getID('requests')) {
@@ -167,7 +168,6 @@ final class RequestManager
                 if ($arFields["PROPERTY_VALUES"][$propId][0]["VALUE"] == $enum["ID"]) {
                     $agentName = "\\Local\\Requests\\Agents\\RequestAgents::archiveRequest(" . $arFields["ID"] . ");";
 
-                    // Проверяем, не добавлен ли уже такой агент, чтобы не дублировать
                     $dbAgents = \CAgent::GetList([], ["NAME" => $agentName]);
                     if (!$dbAgents->Fetch()) {
                         \CAgent::AddAgent(
@@ -193,20 +193,44 @@ final class RequestManager
                         "CODE" => "AUTHOR"
                     ])->GetNext()['ID'];
 
+                    $rsUser = \CUser::GetByID(current($arFields["PROPERTY_VALUES"][$userFieldId])["VALUE"]);
+
+                    if ($arUser = $rsUser->Fetch()) {
+                        $userName = !empty($arUser['NAME']) ? $arUser['NAME'] : $arUser['LOGIN'];
+                        $userEmail = $arUser['EMAIL'];
+                    }
+
                     $dateFieldId = \CIBlockProperty::GetList([], [
                         "IBLOCK_ID" => IBlockHelper::getID('requests'),
                         "CODE" => "MEET_DATE"
                     ])->GetNext()['ID'];
 
-                    \CEvent::Send(
-                        "LOCAL_REQUEST_DONE",
-                        's1',
-                        [
-                            "ID" => $arFields["ID"],
-                            "USER_ID" => current($arFields["PROPERTY_VALUES"][$userFieldId])["VALUE"],
-                            "MEET_DATE" => current($arFields["PROPERTY_VALUES"][$dateFieldId])["VALUE"],
-                        ]
-                    );
+                    $managerCommentFieldId = \CIBlockProperty::GetList([], [
+                        "IBLOCK_ID" => IBlockHelper::getID('requests'),
+                        "CODE" => "MANAGER_COMMENT"
+                    ])->GetNext()['ID'];
+
+                    if (isset($userName) && isset($userEmail)) {
+                        self::$requestId = $arFields["ID"];
+                        \CEvent::SendImmediate(
+                            "LOCAL_REQUEST_DONE",
+                            's1',
+                            [
+                                "REQUEST_DATE" => current($arFields["PROPERTY_VALUES"][$dateFieldId])["VALUE"],
+                                "USER_NAME" => $userName,
+                                "USER_EMAIL" => $userEmail,
+                                "MANAGER_COMMENT" => current($arFields["PROPERTY_VALUES"][$managerCommentFieldId])["VALUE"]
+                            ],
+                        );
+                    } else {
+                        \CEventLog::Add([
+                            "SEVERITY" => "INFO",
+                            "AUDIT_TYPE_ID" => "requests",
+                            "MODULE_ID" => "local.requests",
+                            "ITEM_ID" => $arFields["ID"],
+                            "DESCRIPTION" => "Имя или емейл пользователя утеряны",
+                        ]);
+                    }
                 }
             }
         }
@@ -214,27 +238,24 @@ final class RequestManager
     }
     public static function onBeforeRequestDoneMailSend(&$arFields)
     {
-//        if ($arFields['EVENT_NAME'] === 'LOCAL_REQUEST_DONE') {
-//
-//            // 2. Извлекаем ID заявки из массива полей (CEvent::Send передает их в 'C_FIELDS')
-//            $requestId = isset($arFields['C_FIELDS']['ID']) ? $arFields['C_FIELDS']['ID'] : 'Н/Д';
-//            $date = date('d.m.Y H:i:s');
-//
-//            $extraInfo = "\n\n---";
-//            $extraInfo .= "\nДата отправки: " . $date;
-//            $extraInfo .= "\nID заявки: " . $requestId;
-//
-//            // 3. Добавляем информацию в тело письма
-//            // Учитываем, может ли письмо быть в формате HTML
-//            if (isset($arFields['BODY']) && !empty($arFields['BODY'])) {
-//                if ($arFields['DUPLICATE'] == 'Y' || strpos($arFields['BODY'], '<body') !== false || strpos($arFields['BODY'], '<p') !== false) {
-//                    // Если HTML, добавляем через <br>
-//                    $arFields['BODY'] .= nl2br($extraInfo);
-//                } else {
-//                    // Если обычный текст
-//                    $arFields['BODY'] .= $extraInfo;
-//                }
-//            }
-//        }
+        if ($arFields['HEADER']['X-EVENT_NAME'] === 'LOCAL_REQUEST_DONE') {
+
+            $extraInfo = "\n\n---";
+            if (self::$requestId != "") {
+                $extraInfo .= "\nАйди заявки: " . self::$requestId;
+            }
+
+            $date = date('d.m.Y H:i:s');
+            $extraInfo .= "\nДата отправки: " . $date;
+
+            $arFields['BODY'] .= $extraInfo;
+            \CEventLog::Add([
+                "SEVERITY" => "INFO",
+                "AUDIT_TYPE_ID" => "requests",
+                "MODULE_ID" => "local.requests",
+                "ITEM_ID" => "",
+                "DESCRIPTION" => print_r($arFields, true),
+            ]);
+        }
     }
 }
